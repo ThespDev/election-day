@@ -1,2 +1,6 @@
 # election-day
-A game modelling a population and their uncertainty in voting in an upcoming important political decision
+
+CITS3001 Project - 2022
+
+Due date: **Thursday 13th October (week 11).**
+
