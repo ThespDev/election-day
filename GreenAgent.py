@@ -12,8 +12,13 @@ class GreenAgent:
     def getOpinion(self) -> bool:
         return self.voteOpinion
     
-    def getCertainty(self) -> float:
-        return self.voteOpinion
+    @property
+    def certainty(self) -> float:
+        return self.certainty
+    
+    @certainty.setter
+    def certainty(self,certaintyValue):
+        self.certainty = certaintyValue
     
     def getNeighbours(self) -> list:
         return self.neighbours

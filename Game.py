@@ -21,20 +21,22 @@ def generateGreenArray(numGreen, interval, votePercent,graph ) -> list:
         
 def nodeInteraction(node1: GreenAgent.GreenAgent ,node2: GreenAgent.GreenAgent) -> None:
     if (node1.getOpinion() == node2.getOpinion()):
-        effectNode1 = random.uniform(0,node1.getCertainty())
-        effectNode2 = random.uniform(0,node2.getCertainty())
+        effectNode1 = random.uniform(0,node1.certainty)
+        effectNode2 = random.uniform(0,node2.certainty)
         node1.addCertainty(effectNode2)
         node2.addCertainty(effectNode1)
     else:
-        if node1.getCertainty() < node2.getCertainty():
-            effect = (-1) * random.uniform(0,node2.getCertainty())
+        if node1.certainty < node2.certainty:
+            effect = (-1) * random.uniform(0,node2.certainty)
             node1.addCertainty(effect)
-        elif node1.getCertainty() > node2.getCertainty():
-            effect = (-1) * random.uniform(0,node1.getCertainty())
+        elif node1.certainty > node2.certainty:
+            effect = (-1) * random.uniform(0,node1.certainty)
             node2.addCertainty(effect)
         else:
             pass
 
+def greenTurn():
+    pass
 
     
 def positiveInterval(negInterval: list) -> list:
@@ -59,33 +61,21 @@ def getArgs():
 
 def main():
     args = getArgs()
-    #print("Arg values")
-    #print(args.numGreen)
-    #print(args.numGrey)
     uc = args.certainty
     uc = uc[1:-1]
     uc = uc.split(',')
     for i in range(2):
         uc[i] = float(uc[i])
     interval = positiveInterval(uc)
-    #print("Interval")
-    #print(interval)
     g = ig.Graph.Erdos_Renyi(n=args.numGreen,p=args.probabilityGreen,directed=False,loops=False)
     red = RedAgent.RedAgent()
     blue = BlueAgent.BlueAgent()
     greenArray = generateGreenArray(args.numGreen, interval, args.greenvotePercentage,g)
-    #print("0 NEIGHBOURS")
-    #print(prVoteArray[0].getNeighbours())
-    #print(greenArray)
-    #print(g)
-    #print("ALL EDGES")
-    #print(g.get_edgelist())
-    #print("EDGE EXISTS 1-2")
-    #print(g[1,2])
-
+    
     for i in range(100):
-        red.TakeTurn()
-        blue.TakeTurn()
+        red.TakeTurn(greenArray)
+        blue.TakeTurn(greenArray)
+        greenTurn()
 
 
 if (__name__ == "__main__"):
