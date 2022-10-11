@@ -15,11 +15,11 @@ def generateGreenArray(numGreen, interval, votePercent,graph ) -> list:
             numVoters -= 1
         else:
             opinion = False
-        greenNode = GreenAgent.GreenAgent(opinion,currCertainty,graph.neighbors(i))
+        greenNode = GreenAgent.GreenAgent(opinion,currCertainty,graph.neighbors(i),i)
         greenArray.append(greenNode)
     return greenArray
         
-def nodeInteraction(node1: GreenAgent.GreenAgent ,node2: GreenAgent.GreenAgent) -> None:
+def nodeInteraction(node1 ,node2) -> None:
     if (node1.getOpinion() == node2.getOpinion()):
         effectNode1 = random.uniform(0,node1.certainty)
         effectNode2 = random.uniform(0,node2.certainty)
@@ -35,8 +35,14 @@ def nodeInteraction(node1: GreenAgent.GreenAgent ,node2: GreenAgent.GreenAgent) 
         else:
             pass
 
-def greenTurn():
-    pass
+def greenTurn(greenArray):
+    interactions  = []
+    for node in greenArray:
+        for neighbor in node.neighbors:
+            interaction = tuple(sorted((node.id,neighbor)))
+            if interaction not in interactions:
+                interactions.append(interaction)
+                nodeInteraction(node,greenArray[neighbor])
 
     
 def positiveInterval(negInterval: list) -> list:
@@ -67,18 +73,48 @@ def main():
     for i in range(2):
         uc[i] = float(uc[i])
     interval = positiveInterval(uc)
+    playing = -1
+    while playing not in (1,2):
+        playing = int(input("Please select automated or player mode\n [1] - Player\n [2] - Automated\n"))
+    if playing == 1:
+        team = -1
+        while team not in (1,2):
+            team = int(input("Please select which team you'd like to play\n [1] - Red\n [2] - Blue\n"))
+        if team == 1:
+            redAutomated = False
+            blueAutomated =  True
+        else:
+            redAutomated = True
+            blueAutomated = False
+    else:
+        redAutomated = True
+        blueAutomated = True
     g = ig.Graph.Erdos_Renyi(n=args.numGreen,p=args.probabilityGreen,directed=False,loops=False)
-    red = RedAgent.RedAgent()
-    blue = BlueAgent.BlueAgent()
+    red = RedAgent.RedAgent(interval,redAutomated)
+    blue = BlueAgent.BlueAgent(interval,blueAutomated)
     greenArray = generateGreenArray(args.numGreen, interval, args.greenvotePercentage,g)
     
     for i in range(100):
-        red.TakeTurn(greenArray)
-        blue.TakeTurn(greenArray)
-        greenTurn()
+        gameover = red.takeTurn(greenArray)
+        if gameover:
+            print("Every citizen is ignoring Red, Blue has won")
+            return 1
+        gameover = blue.takeTurn(greenArray)
+        if gameover:
+            print("Blue has spent all of their energy, Red has won")
+            return 0
+        greenTurn(greenArray)
 
 
 if (__name__ == "__main__"):
-    main()
+    blueWins = 0
+    redWins = 0
+    result = main()
+    if result == 1:
+        blueWins += 1
+    else:
+        redWins += 1
+    print(f"Blue wins: {blueWins}")
+    print(f"Red wins: {redWins}")
     
 
