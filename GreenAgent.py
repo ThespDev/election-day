@@ -1,12 +1,13 @@
 class GreenAgent:
 
-    def __init__(self, voteOpinion:bool, certainty:float,neighbours:list,id):
+    def __init__(self, voteOpinion:bool, certainty:float,neighbours:list,id:int, upperbound:float):
         self.voteOpinion = voteOpinion
         self._certainty = certainty
         self.ignoreRed = False
         self.neighbors = neighbours
         self.id = id
-        
+        self.upperBound = upperbound
+
     def TakeTurn(self):
         pass
 
@@ -22,10 +23,14 @@ class GreenAgent:
         self._certainty = certaintyValue
     
     def getNeighbours(self) -> list:
-        return self.neighbours
+        return self.neighbors
 
     def addCertainty(self,certaintyBonus:float) -> None:
         self.certainty += certaintyBonus
+        if self.certainty < 0:
+            self.certainty = 0
+        elif self.certainty > self.upperBound:
+            self.certainty = self.upperBound
 
     def switchOpinion(self) -> None:
         self.voteOpinion = not self.voteOpinion
