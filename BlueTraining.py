@@ -2,7 +2,7 @@ import random
 import torch
 import numpy as np
 from collections import deque
-from Train import TrainingGame
+from BlueGame import TrainingGame
 from Model import Linear_QNet, QTrainer
 from plothelper import plot
 
@@ -17,12 +17,12 @@ class BlueTraining:
         self.epsilon = 0
         self.gamma = 0.9
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_QNet(4,256,6)
+        self.model = Linear_QNet(5,256,11)
         self.trainer = QTrainer(self.model,lr=LR,gamma=self.gamma)
 
 
     def get_state(self,game):
-        state = [game.opinionChange,game.numGrey,game.pGreen,game.greenvotePercentage]
+        state = [game.opinionChange,game.numGrey,game.pGreen,game.greenvotePercentage,game.followers]
         return np.array(state,dtype=float)
     
     def remember(self,state,action,reward,next_state,gameOver):
@@ -43,8 +43,8 @@ class BlueTraining:
         self.trainer.train_step(state,action,reward,next_state,gameover)
 
     def get_action(self,state):
-        self.epsilon = 80 - self.n_games
-        if random.randint(0,200) < self.epsilon:
+        self.epsilon = 500 - self.n_games
+        if random.randint(0,250) < self.epsilon:
             move =  random.randint(0,5)
             #print(f"STATE: {state}")
             #print(f"RANDOM MOVE CHOSEN {move}")
@@ -70,12 +70,14 @@ def train():
     record = 0
     wins = 0
     agent = BlueTraining()
-    game = TrainingGame(100,1,5)
+    game = TrainingGame(100,2,5)
     while True:
         state_old = agent.get_state(game)
         move = agent.get_action(state_old)
         reward,gameOver,score,win = game.simulateTurn(move)
         state_new = agent.get_state(game)
+        if state_old[1] < 0 and move == 0:
+            reward = -1000000
         
 
         agent.train_short_memory(state_old,move,reward,state_new,gameOver)

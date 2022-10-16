@@ -2,7 +2,7 @@ import random
 import torch
 import numpy as np
 from collections import deque
-from Train import TrainingGame
+from RedGame import TrainingGame
 from Model import Linear_QNet, QTrainer
 from plothelper import plot
 
@@ -17,12 +17,12 @@ class RedTraining:
         self.epsilon = 0
         self.gamma = 0.9
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_QNet(5,256,5)
+        self.model = Linear_QNet(6,256,10)
         self.trainer = QTrainer(self.model,lr=LR,gamma=self.gamma)
 
 
     def get_state(self,game):
-        state = [game.opinionChange,game.numGrey,game.pSpy,game.pGreen,game.greenvotePercentage]
+        state = [game.opinionChange,game.numGrey,game.pSpy,game.pGreen,game.greenvotePercentage,game.followers]
         return np.array(state,dtype=float)
     
     def remember(self,state,action,reward,next_state,gameOver):
@@ -43,8 +43,8 @@ class RedTraining:
         self.trainer.train_step(state,action,reward,next_state,gameover)
 
     def get_action(self,state):
-        self.epsilon = 80 - self.n_games
-        if random.randint(0,200) < self.epsilon:
+        self.epsilon = 500 - self.n_games
+        if random.randint(0,250) < self.epsilon:
             move =  random.randint(1,5)
             #print(f"STATE: {state}")
             #print(f"RANDOM MOVE CHOSEN {move}")
@@ -59,7 +59,7 @@ class RedTraining:
 
 def test():
     agent = RedTraining()
-    game = TrainingGame(100,1,5)
+    game = TrainingGame(1000,1,5)
     state_old = agent.get_state(game)
     #print(state_old)
 
@@ -70,7 +70,7 @@ def train():
     record = 0
     wins = 0
     agent = RedTraining()
-    game = TrainingGame(100,1,5)
+    game = TrainingGame(100,1,10)
     while True:
         state_old = agent.get_state(game)
 

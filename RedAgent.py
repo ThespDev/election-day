@@ -60,8 +60,5 @@ class RedAgent:
             return True
         else:
             return False
-                
-
-
-
+    
 
