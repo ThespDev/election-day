@@ -6,7 +6,7 @@ class GreenAgent:
         self.ignoreRed = False
         self.neighbors = neighbours
         self.id = id
-        self.upperBound = upperbound
+        self.certaintyUpperBound = upperbound
 
     def TakeTurn(self):
         pass
@@ -29,8 +29,8 @@ class GreenAgent:
         self.certainty += certaintyBonus
         if self.certainty < 0:
             self.certainty = 0
-        elif self.certainty > self.upperBound:
-            self.certainty = self.upperBound
+        elif self.certainty > self.certaintyUpperBound:
+            self.certainty = self.certaintyUpperBound
 
     def switchOpinion(self) -> None:
         self.voteOpinion = not self.voteOpinion

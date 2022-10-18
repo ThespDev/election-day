@@ -17,7 +17,7 @@ class BlueTraining:
         self.epsilon = 0
         self.gamma = 0.9
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_QNet(5,256,11)
+        self.model = Linear_QNet(5,11)
         self.trainer = QTrainer(self.model,lr=LR,gamma=self.gamma)
 
 
@@ -26,6 +26,8 @@ class BlueTraining:
         return np.array(state,dtype=float)
     
     def remember(self,state,action,reward,next_state,gameOver):
+        if (len(self.memory) >= MAX_MEMORY):
+            self.memory.popleft()
         self.memory.append((state,action,reward,next_state,gameOver))
 
     def train_long_memory(self):
@@ -43,9 +45,9 @@ class BlueTraining:
         self.trainer.train_step(state,action,reward,next_state,gameover)
 
     def get_action(self,state):
-        self.epsilon = 500 - self.n_games
-        if random.randint(0,250) < self.epsilon:
-            move =  random.randint(0,5)
+        self.epsilon = 400 - self.n_games
+        if random.randint(0,80) < self.epsilon:
+            move =  random.randint(0,10)
             #print(f"STATE: {state}")
             #print(f"RANDOM MOVE CHOSEN {move}")
         else:
@@ -86,13 +88,12 @@ def train():
         if gameOver:
             if win:
                 wins += 1
+            
+            agent.model.save()
             game.reset()
             agent.n_games += 1
             agent.train_long_memory()
 
-            if score >= record:
-                record = score
-                agent.model.save()
             print('Game',agent.n_games,'Score',score,'Record',record,'Wins',wins)
             plot_scores.append(score)
             total_score += score 

@@ -17,7 +17,7 @@ class RedTraining:
         self.epsilon = 0
         self.gamma = 0.9
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_QNet(6,256,10)
+        self.model = Linear_QNet(6,10)
         self.trainer = QTrainer(self.model,lr=LR,gamma=self.gamma)
 
 
@@ -26,8 +26,9 @@ class RedTraining:
         return np.array(state,dtype=float)
     
     def remember(self,state,action,reward,next_state,gameOver):
+        if (len(self.memory) >= MAX_MEMORY):
+            self.memory.popleft()
         self.memory.append((state,action,reward,next_state,gameOver))
-
     def train_long_memory(self):
         if len(self.memory) > BATCH_SIZE:
             mini_sample = random.sample(self.memory, BATCH_SIZE)
@@ -43,17 +44,13 @@ class RedTraining:
         self.trainer.train_step(state,action,reward,next_state,gameover)
 
     def get_action(self,state):
-        self.epsilon = 500 - self.n_games
-        if random.randint(0,250) < self.epsilon:
-            move =  random.randint(1,5)
-            #print(f"STATE: {state}")
-            #print(f"RANDOM MOVE CHOSEN {move}")
+        self.epsilon = 400 - self.n_games
+        if random.randint(0,80) < self.epsilon:
+            move =  random.randint(1,10)
         else:
             state0 = torch.tensor(state, dtype=torch.float)
-            #print(f"STATE: {state0}")
             prediction = self.model(state0)
             move =  torch.argmax(prediction).item()
-            #print(f"CHOSEN MOVE {move}")
         print(f"MOVE MADE: {move}")
         return move
 
@@ -76,9 +73,8 @@ def train():
 
         move = agent.get_action(state_old)
         reward,gameOver,score,win = game.simulateTurn(move)
-        if not(move<=5 and move>=1):
-            reward = -10000000
         state_new = agent.get_state(game)
+        
         
 
         agent.train_short_memory(state_old,move,reward,state_new,gameOver)
@@ -87,13 +83,12 @@ def train():
         if gameOver:
             if win:
                 wins += 1
+            
+            agent.model.save()
             game.reset()
             agent.n_games += 1
             agent.train_long_memory()
 
-            if score >= record:
-                record = score
-                agent.model.save()
             print('Game',agent.n_games,'Score',score,'Record',record,'Wins',wins)
             plot_scores.append(score)
             total_score += score 

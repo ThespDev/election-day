@@ -1,63 +1,112 @@
 import random
+from Model import Linear_QNet
+import torch
+import numpy as np
+
 
 class BlueAgent:
     
-    def __init__(self,interval: list, automated:bool):
+    def __init__(self,interval: list, automated:bool,numGrey:int,pSpy:float):
         self.certainty = 0
-        self.intervalUpperBound = interval[1]
-        self.energy = 50
+        self.certaintyUpperBound = interval[1]
+        self.blueEnergy = 500
         self.voteOpinion = True
         self.automated = automated
-
+        self.numGrey = numGrey
+        self.pSpy = pSpy
+        self.model = torch.load('finished_models/Blue500.pth')
+        self.model.eval()
 
 
     def Message(self,potency):
-        if potency == 1:
-            self.energy -= 5
-            influence = 0.5 * self.intervalUpperBound
-        elif potency == 2:
-            self.energy -= 4
-            influence = 0.4 * self.intervalUpperBound
-        elif potency == 3:
-            self.energy -= 3
-            influence = 0.3 * self.intervalUpperBound
+        opinion = True
+        if potency == 0 and self.numGrey <= 0:
+            potency = random.randint(1,10)
+        if potency == 0:
+            self.numGrey -=1
+            if random.random() < self.pSpy:
+                opinion = False
+                influence =  0.5 * self.certaintyUpperBound
+            else:
+                influence = 0.5 * self.certaintyUpperBound
+        elif potency == 10:
+            influence = 0.5 * self.certaintyUpperBound
+            self.blueEnergy -= 20
+        elif potency == 9:
+            influence = 0.45 * self.certaintyUpperBound
+            self.blueEnergy -= 18       
+        elif potency == 8:
+            influence = 0.4 * self.certaintyUpperBound
+            self.blueEnergy -= 16     
+        elif potency == 7:
+            influence = 0.35 * self.certaintyUpperBound
+            self.blueEnergy -= 14
+        elif potency == 6:
+            influence = 0.3 * self.certaintyUpperBound
+            self.blueEnergy -= 12
+        elif potency == 5:
+            influence = 0.25 * self.certaintyUpperBound
+            self.blueEnergy -= 10
         elif potency == 4:
-            self.energy -= 2
-            influence = 0.2 * self.intervalUpperBound
+            self.blueEnergy -= 8 
+            influence = 0.2 * self.certaintyUpperBound
+        elif potency == 3:
+            self.blueEnergy -= 6
+            influence = 0.15 * self.certaintyUpperBound
+        elif potency == 2:
+            influence = 0.1 * self.certaintyUpperBound
+            self.blueEnergy -= 4
         else:
-            self.energy -= 1
-            influence = 0.1 * self.intervalUpperBound
+            influence = 0.05 * self.certaintyUpperBound
+            self.blueEnergy -= 2
         self.certainty = influence
+        return opinion
 
-    def nodeInteraction(self,node) -> None:
-        if (node.voteOpinion == self.voteOpinion):
+    def nodeInteraction(self,node,voteOpinion) -> None:
+        if (node.voteOpinion == voteOpinion):
             effect = random.uniform(0, self.certainty)
             node.addCertainty(effect)
         else:
             if node.certainty <= self.certainty:
                 effect = (-1) * random.uniform(0,self.certainty)
                 node.addCertainty(effect)
+    
+    def get_state(self,state):
+        return np.array(state,dtype=float)
 
-       
+    def get_action(self,state):
+        state0 = torch.tensor(state, dtype=torch.float)
+        prediction = self.model(state0)
+        move =  torch.argmax(prediction).item()
+        print(f"BLUE MOVE {move}")
+        return move
+
+           
         
-    def takeTurn(self,greenArray) -> bool:
+    def takeTurn(self,greenArray,state):
         if self.automated:
-            selection = random.randint(1,5)
+            #npState = self.get_state(state)
+            #validSelection = self.get_action(npState)
+            validSelection = random.randint(1,10)
         else:
-            agentOrMessage = -1
-            while agentOrMessage not in (1,2):
-                agentOrMessage = int(input("Send a message or introduce a Grey Agent?\n[1] - Send Message\n[2] - Introduce Grey Agent\n"))
-                if agentOrMessage == 1:
-                    selection = -1
-                    while selection not in range(1,6):
-                        selection  = int(input("Select the potency of your message (1-5)\n"))
-        self.Message(selection)
-        print(f"Blue's energy {self.energy}")
-        if self.energy <= 0:
-            return True
+            validSelection = -1
+            while validSelection not in range(0,11):
+                selection  = int(input("Select the potency of your message (1-11) or bring a Grey agent into the network (0)\n"))
+                if selection == 0 and self.numGrey == 0:
+                    print("No Grey agents left!")
+                else:
+                    validSelection = selection
+                    
+        opinion = self.Message(validSelection)
+        print(f"Blue's energy {self.blueEnergy}")
+        blueFollowers = 0
+        if self.blueEnergy <= 0:
+            return True, blueFollowers
         for node in greenArray:
-            self.nodeInteraction(node)
-        return False
+            if node.voteOpinion:
+                blueFollowers += 1
+            self.nodeInteraction(node,opinion)
+        return False, blueFollowers
                 
 
 

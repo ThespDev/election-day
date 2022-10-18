@@ -15,7 +15,7 @@ class TrainingGame:
         self.pGreen = random.uniform(0.4,0.7)
         self.greenvotePercentage = random.uniform(0.4,0.7)
         self.opinionChange = 0
-        self.blueEnergy = 300
+        self.blueEnergy = 500
         self.g = ig.Graph.Erdos_Renyi(n=self.numGreen,p=self.greenvotePercentage,directed=False,loops=False)
         self.greenArray = self.generateGreenArray(self.g)
         self.turnCount = 0
@@ -199,7 +199,7 @@ class TrainingGame:
         blueWinner = False
         if numRedInfluence == 0:
             print("RED INFLUENCE 0")
-            reward = 100
+            reward = 150
             gameOver = True
             blueWinner = True
         elif newOpinionCount == 0:
@@ -213,7 +213,7 @@ class TrainingGame:
         elif newOpinionCount == self.numGreen:
             print("EVERYONE FOLLOWING")
             gameOver = True
-            reward = 100
+            reward = 50
             blueWinner = True
 
         #elif newOpinionCount > oldOpinionCount:

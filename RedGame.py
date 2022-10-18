@@ -15,7 +15,7 @@ class TrainingGame:
         self.pGreen = random.uniform(0.4,0.7)
         self.greenvotePercentage = random.uniform(0.4,0.7)
         self.opinionChange = 0
-        self.blueEnergy = 300
+        self.blueEnergy = 600
         self.g = ig.Graph.Erdos_Renyi(n=self.numGreen,p=self.greenvotePercentage,directed=False,loops=False)
         self.greenArray = self.generateGreenArray(self.g)
         self.turnCount = 0
@@ -117,7 +117,7 @@ class TrainingGame:
     
     def blueTurn(self):
         if self.numGrey > 0:
-            choice = random.randint(0,1)
+            choice = random.randint(0,10)
         else:
             choice = 0
 
