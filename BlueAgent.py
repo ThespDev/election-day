@@ -24,39 +24,50 @@ class BlueAgent:
             potency = random.randint(1,10)
         if potency == 0:
             self.numGrey -=1
+            print("A Grey agent has been brought in")
             if random.random() < self.pSpy:
                 opinion = False
                 influence =  0.5 * self.certaintyUpperBound
             else:
                 influence = 0.5 * self.certaintyUpperBound
         elif potency == 10:
+            print("Vote for your freedom! Remember the past")
             influence = 0.5 * self.certaintyUpperBound
             self.blueEnergy -= 20
         elif potency == 9:
+            print("Do it for your family, vote on the decision!")
             influence = 0.45 * self.certaintyUpperBound
             self.blueEnergy -= 18       
         elif potency == 8:
+            print("Don't be influenced by the Red propaganda")
             influence = 0.4 * self.certaintyUpperBound
             self.blueEnergy -= 16     
         elif potency == 7:
+            print("Make sure to vote! Exercise your rights")
             influence = 0.35 * self.certaintyUpperBound
             self.blueEnergy -= 14
         elif potency == 6:
+            print("Voting is important")
             influence = 0.3 * self.certaintyUpperBound
             self.blueEnergy -= 12
         elif potency == 5:
+            print("Think of our democracy!")
             influence = 0.25 * self.certaintyUpperBound
             self.blueEnergy -= 10
         elif potency == 4:
+            print("Please vote people!")
             self.blueEnergy -= 8 
             influence = 0.2 * self.certaintyUpperBound
         elif potency == 3:
+            print("Make sure to vote please")
             self.blueEnergy -= 6
             influence = 0.15 * self.certaintyUpperBound
         elif potency == 2:
+            print("You should uhhh, vote!")
             influence = 0.1 * self.certaintyUpperBound
             self.blueEnergy -= 4
         else:
+            print("Make sure to not vote, I mean um, please vote!")
             influence = 0.05 * self.certaintyUpperBound
             self.blueEnergy -= 2
         self.certainty = influence
@@ -91,7 +102,7 @@ class BlueAgent:
         else:
             validSelection = -1
             while validSelection not in range(0,11):
-                selection  = int(input("Select the potency of your message (1-11) or bring a Grey agent into the network (0)\n"))
+                selection  = int(input("Select the potency of your message (1-10) or bring a Grey agent into the network (0)\n"))
                 if selection == 0 and self.numGrey == 0:
                     print("No Grey agents left!")
                 else:
